@@ -1,0 +1,230 @@
+/* Genel Stil Reset ve Font Ayarları */
+:root {
+    --primary-color: #007bff;
+    --secondary-color: #6c757d;
+    --background-color: #f4f7f6;
+    --card-bg: #ffffff;
+    --text-color: #343a40;
+    --shadow-color: rgba(0, 0, 0, 0.1);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    line-height: 1.6;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding: 40px 20px;
+}
+
+.container {
+    width: 100%;
+    max-width: 800px;
+    text-align: center;
+}
+
+h1 {
+    color: var(--primary-color);
+    margin-bottom: 30px;
+    font-weight: 700;
+}
+
+/* Arama Kutusu Stili */
+.search-box {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 30px;
+    padding: 0 10px;
+}
+
+#countryInput {
+    flex-grow: 1;
+    padding: 12px 15px;
+    border: 2px solid #ced4da;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: border-color 0.3s;
+}
+
+#countryInput:focus {
+    border-color: var(--primary-color);
+    outline: none;
+}
+
+#searchButton {
+    padding: 12px 25px;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+#searchButton:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+}
+
+/* Mesaj Alanı Stili (Hata/Yükleme) */
+.message {
+    padding: 15px;
+    margin: 15px auto;
+    border-radius: 8px;
+    max-width: 400px;
+    font-weight: 600;
+    opacity: 0;
+    height: 0;
+    overflow: hidden;
+    transition: opacity 0.5s, height 0.5s;
+}
+
+.message.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+    opacity: 1;
+    height: auto;
+}
+
+.message.loading {
+    background-color: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+    opacity: 1;
+    height: auto;
+}
+
+.message.info {
+    opacity: 1;
+    height: auto;
+}
+
+/* Ülke Bilgi Kartı Stili */
+.country-card {
+    background-color: var(--card-bg);
+    border-radius: 15px; /* Köşeleri yuvarlak */
+    box-shadow: 0 10px 30px var(--shadow-color); /* Gölge efekti */
+    overflow: hidden;
+    margin-top: 30px;
+    text-align: left;
+    transition: transform 0.3s ease-in-out; /* Hover animasyonu için */
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.country-card:hover {
+    transform: translateY(-5px); /* Hafif yukarı kaydırma animasyonu */
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+}
+
+.country-card.hidden {
+    display: none;
+}
+
+.card-header {
+    width: 100%;
+    height: 180px; /* Bayrak için sabit bir yükseklik */
+    overflow: hidden;
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+    background-color: #f0f0f0; /* Yüklenirken arka plan */
+}
+
+.flag-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Bayrağın konteynırı doldurması */
+    display: block;
+    border-bottom: 3px solid var(--primary-color);
+}
+
+.card-body {
+    padding: 25px;
+}
+
+.card-body h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+    font-size: 28px;
+    text-align: center;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 10px;
+}
+
+/* Bilgi Tablosu Stili */
+.country-info-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+.country-info-table tr {
+    border-bottom: 1px solid #eee;
+}
+
+.country-info-table tr:last-child {
+    border-bottom: none;
+}
+
+.country-info-table td {
+    padding: 12px 0;
+    font-size: 16px;
+}
+
+.country-info-table td:first-child {
+    font-weight: 600;
+    width: 40%;
+    color: var(--secondary-color);
+}
+
+.country-info-table a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.country-info-table a:hover {
+    text-decoration: underline;
+}
+
+/* Responsive Düzenlemeler */
+@media (max-width: 600px) {
+    .search-box {
+        flex-direction: column;
+        padding: 0;
+    }
+
+    #searchButton, #countryInput {
+        width: 100%;
+    }
+
+    .card-body h2 {
+        font-size: 24px;
+    }
+
+    .country-info-table td {
+        display: block;
+        width: 100%;
+        padding: 8px 0;
+    }
+    
+    .country-info-table td:first-child {
+        width: 100%;
+        margin-bottom: 4px;
+        color: var(--text-color);
+    }
+}
