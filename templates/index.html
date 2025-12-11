@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ülke Bilgi Kartları</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div class="container">
+        <h1>🌎 Ülke Bilgi Kartı Uygulaması</h1>
+        <div class="search-box">
+            <input type="text" id="countryInput" placeholder="Bir ülke adı girin (örn: Turkey, France, Germany)">
+            <button id="searchButton">ARA</button>
+        </div>
+
+        <p id="message" class="message"></p>
+        
+        <div id="countryCard" class="country-card hidden">
+            </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const countryInput = document.getElementById('countryInput');
+            const searchButton = document.getElementById('searchButton');
+            const countryCard = document.getElementById('countryCard');
+            const messageElement = document.getElementById('message');
+
+            searchButton.addEventListener('click', searchCountry);
+            countryInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    searchCountry();
+                }
+            });
+
+            async function searchCountry() {
+                const countryName = countryInput.value.trim();
+                
+                if (!countryName) {
+                    displayMessage('Lütfen bir ülke adı girin.', 'error');
+                    countryCard.classList.add('hidden');
+                    return;
+                }
+
+                // Arama başlatıldığında kartı gizle ve yükleme mesajı göster
+                countryCard.classList.add('hidden');
+                displayMessage('Bilgiler yükleniyor...', 'loading');
+                
+                try {
+                    const response = await fetch(`/api/country/${countryName}`);
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        renderCountryCard(data);
+                        countryCard.classList.remove('hidden');
+                        displayMessage(''); // Mesajı temizle
+                    } else {
+                        // Backend'den gelen hata mesajını göster
+                        displayMessage(data.error || 'Bilinmeyen bir hata oluştu.', 'error');
+                        countryCard.classList.add('hidden');
+                    }
+
+                } catch (error) {
+                    console.error('Fetch hatası:', error);
+                    displayMessage('Ağa bağlanırken bir hata oluştu. Lütfen tekrar deneyin.', 'error');
+                    countryCard.classList.add('hidden');
+                }
+            }
+
+            function renderCountryCard(data) {
+                // Bilgiler tablosu oluşturuluyor
+                const infoTable = `
+                    <table class="country-info-table">
+                        <tr>
+                            <td><strong>Başkent</strong></td>
+                            <td>${data['başkent']}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Nüfus</strong></td>
+                            <td>${data['nüfus']}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Kıta</strong></td>
+                            <td>${data['kıta']}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Bölge</strong></td>
+                            <td>${data['bölge']}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Para Birimi</strong></td>
+                            <td>${data['para birimi']}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Diller</strong></td>
+                            <td>${data['diller']}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Harita</strong></td>
+                            <td><a href="${data['harita bağlantısı']}" target="_blank">Google Maps'te Gör</a></td>
+                        </tr>
+                    </table>
+                `;
+
+                // Kartın ana yapısı oluşturuluyor
+                countryCard.innerHTML = `
+                    <div class="card-header">
+                        <img src="${data['bayrak görseli']}" alt="${data['ülke adı']} Bayrağı" class="flag-image">
+                    </div>
+                    <div class="card-body">
+                        <h2>${data['ülke adı']}</h2>
+                        ${infoTable}
+                    </div>
+                `;
+            }
+
+            function displayMessage(text, type = 'info') {
+                messageElement.textContent = text;
+                messageElement.className = `message ${type}`; // Sınıfı temizleyip yenisini ekle
+            }
+        });
+    </script>
+</body>
+</html>
