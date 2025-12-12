@@ -1,115 +1,166 @@
 import requests
+import logging
 from flask import Flask, jsonify, request, render_template
+from flask_cors import CORS 
+
+# =========================================================================
+# 1. TEMEL YAPILANDIRMA VE SABİTLER
+# =========================================================================
 
 app = Flask(__name__)
+CORS(app) # Tüm endpoint'ler için CORS'u etkinleştir (Geliştirme için önemli)
+
+# ⚠️ KENDİ OPENWEATHERMAP API ANAHTARINIZI BURAYA YAZIN
+WEATHER_API_KEY = "YOUR_OPENWEATHERMAP_API_KEY" 
+WEATHER_API_URL = "https://api.openweathermap.org/data/2.5/weather"
 
 # REST Countries API temel URL'si
-API_URL = "https://restcountries.com/v3.1/name/"
+COUNTRY_API_URL = "https://restcountries.com/v3.1/name/"
 
-# Bilgilerin Türkçe anahtarları
-COUNTRY_INFO_KEYS = {
-    "name": "Ülke Adı",
-    "capital": "Başkent",
-    "population": "Nüfus",
-    "region": "Bölge",
-    "flag_img": "Bayrak Görseli",
-    "map_link": "Harita Bağlantısı",
-    "currencies": "Para Birimi",
-    "languages": "Diller",
-    "continent": "Kıta"
-}
+# Basit bir önbellekleme mekanizması (Hafızada)
+country_cache = {}
+
+
+# =========================================================================
+# 2. YARDIMCI FONKSİYONLAR
+# =========================================================================
+
+def get_weather_data(capital):
+    """Başkent adına göre hava durumu verilerini OpenWeatherMap'ten çeker."""
+    if not WEATHER_API_KEY or capital == 'N/A' or not capital:
+        return {"error": "Hava durumu API anahtarı veya başkent bilgisi eksik."}
+
+    try:
+        weather_params = {
+            'q': capital,
+            'appid': WEATHER_API_KEY,
+            'units': 'metric', # Santigrat
+            'lang': 'tr' # Türkçe açıklama
+        }
+        response = requests.get(WEATHER_API_URL, params=weather_params, timeout=5)
+        response.raise_for_status()
+        
+        data = response.json()
+        
+        return {
+            "temp": round(data['main']['temp']),
+            "description": data['weather'][0]['description'].capitalize(),
+            "icon": data['weather'][0]['icon'],
+            "wind": round(data['wind']['speed'])
+        }
+
+    except requests.exceptions.HTTPError as e:
+        return {"error": f"Hava durumu bilgisi alınamadı ({e.response.status_code})."}
+    except requests.exceptions.RequestException as e:
+        logging.error(f"Hava durumu bağlantı hatası ({capital}): {e}")
+        return {"error": "Hava durumu API'sine bağlanılamadı."}
+    except Exception as e:
+        logging.error(f"Hava durumu işleme hatası: {e}")
+        return {"error": "Bilinmeyen bir hava durumu hatası."}
+
 
 def clean_country_data(data):
-    """
-    REST Countries API'den gelen ham veriyi temizler ve istenen formatta düzenler.
-    """
+    """REST Countries API verisini temizler ve gelişmiş frontend için hazırlar."""
     if not data or not isinstance(data, list):
         return None
 
-    # API'den gelen ilk ülke objesini alıyoruz
     country = data[0]
 
-    # Para birimi verisini temizleme
+    # --- Veri Çıkarımı ---
     currencies = country.get('currencies', {})
-    currency_list = []
-    for code, info in currencies.items():
-        currency_list.append(f"{info.get('name', 'N/A')} ({code})")
+    currency_code = next(iter(currencies.keys()), 'N/A')
+    currency_info = currencies.get(currency_code, {})
+    currency_name = currency_info.get('name', 'N/A')
+    currency_symbol = currency_info.get('symbol', '')
     
-    # Dil verisini temizleme
     languages = country.get('languages', {})
     language_list = list(languages.values())
     
-    # Başkent (bazen liste olarak geliyor)
-    capital = country.get('capital', ['N/A'])
-    if isinstance(capital, list):
-        capital = ', '.join(capital)
+    capital_list = country.get('capital', ['N/A'])
+    capital = capital_list[0] if capital_list and capital_list[0] else 'N/A'
+    
+    latlng = country.get('latlng', [0, 0])
+    
+    continent = country.get('continents', ['N/A'])[0]
+    
+    # --- Dinamik Tema Rengi ---
+    theme_color = {
+        "Africa": "yellow",
+        "Europe": "blue",
+        "Asia": "red",
+        "Americas": "green",
+        "Oceania": "turquoise"
+    }.get(continent, "gray")
 
-    # Kıta (bazen liste olarak geliyor)
-    continents = country.get('continents', ['N/A'])
-    if isinstance(continents, list):
-        continent = ', '.join(continents)
-    else:
-        continent = continents
+    # --- İkincil API Çağrısı ---
+    weather = get_weather_data(capital)
 
-    # İstenen formatta son veri yapısını oluştur
+
+    # --- İstenen formatta son veri yapısını oluştur ---
     cleaned_data = {
         "ülke adı": country.get('name', {}).get('common', 'N/A'),
         "başkent": capital,
-        "nüfus": f"{country.get('population', 0):,}".replace(",", "."), # Nüfusu okunabilir formatta göster
+        "nüfus": country.get('population', 0), # CANVAS için sayısal tutuldu
         "bölge": country.get('region', 'N/A'),
         "bayrak görseli": country.get('flags', {}).get('svg', ''),
         "harita bağlantısı": country.get('maps', {}).get('googleMaps', '#'),
-        "para birimi": ', '.join(currency_list) if currency_list else 'N/A',
+        
+        # Gelişmiş Alanlar
+        "para birimi": f"{currency_name} ({currency_code})",
+        "para birimi kısa": currency_code,
+        "para birimi sembol": currency_symbol,
         "diller": ', '.join(language_list) if language_list else 'N/A',
-        "kıta": continent
+        "ana dil": language_list[0] if language_list else 'N/A',
+        "kıta": continent,
+        "latlng": latlng, 
+        "tema rengi": theme_color,
+        "hava durumu": weather
     }
     
     return cleaned_data
 
-# Ana sayfa (Frontend'i sunar)
+# =========================================================================
+# 3. ROUTE İŞLEMLERİ
+# =========================================================================
+
 @app.route('/')
 def index():
     return render_template('index.html')
 
-# API Endpoint'i: /api/country/<country_name>
 @app.route('/api/country/<country_name>', methods=['GET'])
 def get_country_info(country_name):
-    if not country_name:
-        return jsonify({"error": "Lütfen bir ülke adı girin."}), 400
+    country_name = country_name.strip()
+    
+    if country_name in country_cache:
+        return jsonify(country_cache[country_name]), 200
 
     try:
-        # REST Countries API'ye istek gönderme
-        response = requests.get(f"{API_URL}{country_name}", timeout=10)
-        response.raise_for_status() # Hata durumları (4xx veya 5xx) için istisna fırlatır
-        
+        response = requests.get(f"{COUNTRY_API_URL}{country_name}", timeout=10)
+        response.raise_for_status()
         data = response.json()
         
-        # Eğer API'den hata veya boş sonuç gelirse (örn: "Not Found")
-        if response.status_code == 404 or 'status' in data and data['status'] == 404:
+        if response.status_code == 404 or ('status' in data and data['status'] == 404):
             return jsonify({"error": "Ülke Bulunamadı. Lütfen tam ve doğru bir ülke adı girin."}), 404
 
-        # Gelen veriyi temizleyip düzenleme
         country_data = clean_country_data(data)
 
         if not country_data:
              return jsonify({"error": "Ülke Bulunamadı veya veri formatı beklenenden farklı."}), 404
         
+        country_cache[country_name] = country_data
+        
         return jsonify(country_data), 200
 
     except requests.exceptions.HTTPError as e:
-        # 4xx veya 5xx hatalarını yakala
         if e.response.status_code == 404:
             return jsonify({"error": "Ülke Bulunamadı. Lütfen ülke adını kontrol edin."}), 404
-        return jsonify({"error": f"API'ye bağlanırken bir hata oluştu: {e}"}), e.response.status_code
+        return jsonify({"error": f"API'ye bağlanırken bir HTTP hatası oluştu: {e}"}), e.response.status_code
         
     except requests.exceptions.RequestException as e:
-        # Ağ bağlantısı, timeout vb. hataları yakala
         return jsonify({"error": f"Bir bağlantı hatası oluştu: {e}"}), 503
         
     except Exception as e:
-        # Beklenmedik diğer hataları yakala
         return jsonify({"error": f"Beklenmedik bir hata oluştu: {e}"}), 500
 
 if __name__ == '__main__':
-    # Geliştirme ortamında çalıştırmak için debug=True ayarı
     app.run(debug=True, host='0.0.0.0', port=5000)
