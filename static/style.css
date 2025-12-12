@@ -15,9 +15,8 @@
     --shadow-hover: 0 15px 40px rgba(0, 0, 0, 0.2);
     
     /* Dinamik Tema Renkleri (Varsayılan Gri) */
-    --theme-bg: #f9fafb;
-    --theme-dark: #6b7280;
-    --weather-bg: #dbeafe; 
+    --theme-bg: #f9fafb; /* Kıta temalı zemin rengi için varsayılan */
+    --theme-dark: #6b7280; /* Kıta temalı vurgu rengi için varsayılan */
 }
 
 * {
@@ -65,7 +64,7 @@ h1 {
     border-radius: 12px;
     font-size: 16px;
     transition: all 0.3s ease;
-    background-color: rgba(255, 255, 255, 0.9); /* Hafif şeffaf input */
+    background-color: rgba(255, 255, 255, 0.9);
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
@@ -135,18 +134,12 @@ h1 {
 
 
 /* Kıtaya Göre Tema Rengi Dinamikliği (JS tarafından atanan data-theme) */
-/* Afrika (Sarı) */
-.card-header[data-theme="yellow"] { --theme-dark: #facc15; --theme-bg: #fffbe3; }
-/* Avrupa (Mavi) */
-.card-header[data-theme="blue"] { --theme-dark: #3b82f6; --theme-bg: #eff6ff; }
-/* Asya (Kırmızı) */
-.card-header[data-theme="red"] { --theme-dark: #ef4444; --theme-bg: #fef2f2; }
-/* Amerika (Yeşil) */
-.card-header[data-theme="green"] { --theme-dark: #10b981; --theme-bg: #f0fdf4; }
-/* Okyanusya (Turkuaz) */
-.card-header[data-theme="turquoise"] { --theme-dark: #06b6d4; --theme-bg: #f0f9ff; }
-/* Diğer/Varsayılan */
-.card-header[data-theme="gray"] { --theme-dark: #6b7280; --theme-bg: #f9fafb; }
+.card-header[data-theme="yellow"] { --theme-dark: #facc15; --theme-bg: #fffbe3; } /* Afrika */
+.card-header[data-theme="blue"] { --theme-dark: #3b82f6; --theme-bg: #eff6ff; }  /* Avrupa */
+.card-header[data-theme="red"] { --theme-dark: #ef4444; --theme-bg: #fef2f2; }   /* Asya */
+.card-header[data-theme="green"] { --theme-dark: #10b981; --theme-bg: #f0fdf4; } /* Amerika */
+.card-header[data-theme="turquoise"] { --theme-dark: #06b6d4; --theme-bg: #f0f9ff; } /* Okyanusya */
+.card-header[data-theme="gray"] { --theme-dark: #6b7280; --theme-bg: #f9fafb; } /* Varsayılan */
 
 
 /* Bayrak Başlığı (Card Header) */
@@ -204,9 +197,24 @@ h1 {
 /* 4. YENİ BÖLÜM YAPISI (2 SÜTUNLU DÜZEN) VE ROZETLER */
 /* ========================================================================= */
 
-.info-row { display: flex; gap: 30px; margin-top: 20px; }
-.info-column { flex: 1; min-width: 0; }
-.section-title { font-size: 18px; color: var(--theme-dark); font-weight: 600; margin-top: 20px; margin-bottom: 15px; padding-bottom: 5px; border-bottom: 2px dashed #e5e7eb; }
+.info-row { 
+    display: flex; 
+    gap: 30px; 
+    margin-top: 20px;
+}
+.info-column { 
+    flex: 1; 
+    min-width: 0; 
+}
+.section-title { 
+    font-size: 18px; 
+    color: var(--theme-dark); 
+    font-weight: 600; 
+    margin-top: 20px; 
+    margin-bottom: 15px; 
+    padding-bottom: 5px; 
+    border-bottom: 2px dashed #e5e7eb; 
+}
 
 /* Rozetler (Tags) */
 .info-badges {
@@ -220,317 +228,8 @@ h1 {
 }
 
 .badge {
-    background-color: var(--theme-bg); /* Kıta temalı rozet arkaplanı */
-    color: var(--theme-dark); /* Kıta temalı rozet metni */
-    padding: 8px 15px;
-    border-radius: 50px;
-    font-size: 14px;
-    font-weight: 600;
-    white-space: nowrap;
-}
-
-.badge i { margin-right: 5px; }
-
-/* ========================================================================= */
-/* 5. HAVA DURUMU STİLİ */
-/* ========================================================================= */
-
-.weather-box {
-    background-color: var(--weather-bg);
-    border-radius: 12px;
-    padding: 15px;
-    margin-bottom: 25px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-    border: 1px solid #d1d5db;
-}
-
-.weather-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 10px;
-    border-bottom: 1px dashed #c0c0c0;
-    padding-bottom: 10px;
-}
-
-.weather-icon { width: 60px; height: 60px; }
-
-.weather-temp { font-size: 40px; font-weight: 700; color: var(--theme-dark); }
-
-.weather-details { font-size: 15px; margin: 5px 0; color: var(--secondary-color); }
-.weather-details strong { color: var(--text-color); }
-.error-weather { background-color: #fee2e2; color: #ef4444; padding: 10px; text-align: center; }
-
-/* ========================================================================= */
-/* 6. TABLO, HARİTA VE GRAFİK STİLLERİ */
-/* ========================================================================= */
-
-.country-info-table { width: 100%; border-collapse: separate; border-spacing: 0 5px; margin-top: 15px; }
-
-.country-info-table tr:nth-child(even) { background-color: var(--theme-bg); }
-
-.country-info-table td { padding: 10px 15px; font-size: 15px; vertical-align: middle; }
-
-.country-info-table td:first-child { font-weight: 600; width: 40%; color: var(--secondary-color); padding-left: 0; }
-
-.country-info-table td i { margin-right: 8px; color: var(--theme-dark); }
-
-.mini-map-image { width: 100%; height: 150px; border-radius: 10px; object-fit: cover; margin-bottom: 15px; border: 3px solid var(--theme-dark); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); }
-
-.chart-container { padding: 15px; background-color: var(--theme-bg); border-radius: 12px; margin-top: 20px; }
-.chart-label { margin-top: 10px; font-weight: 600; color: var(--text-color); }
-
-/* ========================================================================= */
-/* 7. AKSİYON BUTONLARI (MARŞ/WIKIPEDIA) */
-/* ========================================================================= */
-
-.card-actions { display: flex; justify-content: space-around; gap: 15px; margin-top: 30px; padding-top: 15px; border-top: 1px solid #eee; }
-
-.action-btn { flex: 1; padding: 12px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s; text-decoration: none; text-align: center; }
-
-.anthem-btn { background-color: var(--theme-dark); color: white; }
-.anthem-btn:hover { background-color: #000; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); }
-
-.info-btn { background-color: #f3f4f6; color: var(--secondary-color); border: 1px solid #d1d5db; }
-.info-btn:hover { background-color: #e5e7eb; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); }
-
-/* ========================================================================= */
-/* 8. RESPONSIVE (MOBİL UYUMLULUK) */
-/* ========================================================================= */
-
-@media (max-width: 800px) {
-    .info-row { flex-direction: column; gap: 20px; }
-    .card-body { padding: 20px; }
-    .card-actions { flex-direction: column; gap: 10px; }
-    .header-overlay h2 { font-size: 30px; }
-    
-    /* Mobil Tablo Düzeni */
-    .country-info-table td { display: block; width: 100%; padding: 5px 0; }
-    .country-info-table td:first-child { font-weight: 700; color: var(--text-color); margin-bottom: 2px; }
-}/* ========================================================================= */
-/* 1. KÖK STİLLER VE GENEL AYARLAR (GLASSMORPHISM) */
-/* ========================================================================= */
-
-:root {
-    /* Temel Renkler */
-    --primary-color: #3b82f6; /* Canlı Mavi */
-    --secondary-color: #6b7280; /* Gri Tonlar */
-    --text-color: #1f2937; /* Koyu Metin */
-    --text-light: #f9fafb; /* Açık Metin */
-    
-    /* Glassmorphism ve Gölge */
-    --card-bg-blur: rgba(255, 255, 255, 0.3); /* Şeffaf Kart Arkaplanı */
-    --shadow-glass: 0 8px 32px 0 rgba(31, 38, 135, 0.37); /* Cam Gölgesi */
-    --shadow-hover: 0 15px 40px rgba(0, 0, 0, 0.2);
-    
-    /* Dinamik Tema Renkleri (Varsayılan Gri) */
-    --theme-bg: #f9fafb;
-    --theme-dark: #6b7280;
-    --weather-bg: #dbeafe; 
-}
-
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
-
-body {
-    font-family: 'Poppins', sans-serif;
-    /* BLUR VE CAM EFEKTİ İÇİN CANLI ARKA PLAN */
-    background: linear-gradient(135deg, #a7f3d0 0%, #3b82f6 100%); 
-    color: var(--text-color);
-    line-height: 1.6;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    min-height: 100vh;
-    padding: 40px 20px;
-}
-
-.container {
-    width: 100%;
-    max-width: 950px;
-    text-align: center;
-}
-
-h1 {
-    color: var(--text-light);
-    margin-bottom: 30px;
-    font-weight: 700;
-    text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-}
-
-/* ========================================================================= */
-/* 2. ARAMA VE MESAJ STİLLERİ */
-/* ========================================================================= */
-
-.search-box { display: flex; gap: 12px; margin-bottom: 30px; padding: 0 10px; }
-
-#countryInput {
-    flex-grow: 1;
-    padding: 14px 18px;
-    border: none;
-    border-radius: 12px;
-    font-size: 16px;
-    transition: all 0.3s ease;
-    background-color: rgba(255, 255, 255, 0.9); /* Hafif şeffaf input */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-#countryInput:focus { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.4); outline: none; }
-
-#searchButton {
-    padding: 14px 25px;
-    background-color: var(--primary-color);
-    color: white;
-    border: none;
-    border-radius: 12px;
-    cursor: pointer;
-    font-size: 16px;
-    font-weight: 600;
-    transition: background-color 0.3s, transform 0.2s, box-shadow 0.3s;
-}
-
-#searchButton:hover {
-    background-color: #2563eb;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);
-}
-
-.message {
-    padding: 15px;
-    margin: 15px auto;
-    border-radius: 10px;
-    max-width: 400px;
-    font-weight: 600;
-    opacity: 1; 
-    transition: all 0.5s;
-    height: auto;
-    text-align: center;
-}
-.message.error { background-color: #fee2e2; color: #ef4444; border: 1px solid #fca5a5; }
-.message.loading { background-color: #dbeafe; color: #2563eb; border: 1px solid #93c5fd; }
-
-
-/* ========================================================================= */
-/* 3. COUNTRY CARD (GLASSMORPHISM VE TEMA DİNAMİKLİĞİ) */
-/* ========================================================================= */
-
-.country-card {
-    /* Glassmorphism Uygulaması */
-    background: var(--card-bg-blur); 
-    box-shadow: var(--shadow-glass); 
-    backdrop-filter: blur(15px); /* Cam efekti */
-    -webkit-backdrop-filter: blur(15px);
-    
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    border-radius: 20px;
-    overflow: hidden;
-    margin-top: 35px;
-    text-align: left;
-    transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.4s;
-    max-width: 900px;
-    margin-left: auto;
-    margin-right: auto;
-    position: relative;
-    z-index: 10;
-}
-
-.country-card:hover {
-    transform: translateY(-10px);
-    box-shadow: var(--shadow-hover); 
-}
-
-
-/* Kıtaya Göre Tema Rengi Dinamikliği (JS tarafından atanan data-theme) */
-/* Afrika (Sarı) */
-.card-header[data-theme="yellow"] { --theme-dark: #facc15; --theme-bg: #fffbe3; }
-/* Avrupa (Mavi) */
-.card-header[data-theme="blue"] { --theme-dark: #3b82f6; --theme-bg: #eff6ff; }
-/* Asya (Kırmızı) */
-.card-header[data-theme="red"] { --theme-dark: #ef4444; --theme-bg: #fef2f2; }
-/* Amerika (Yeşil) */
-.card-header[data-theme="green"] { --theme-dark: #10b981; --theme-bg: #f0fdf4; }
-/* Okyanusya (Turkuaz) */
-.card-header[data-theme="turquoise"] { --theme-dark: #06b6d4; --theme-bg: #f0f9ff; }
-/* Diğer/Varsayılan */
-.card-header[data-theme="gray"] { --theme-dark: #6b7280; --theme-bg: #f9fafb; }
-
-
-/* Bayrak Başlığı (Card Header) */
-.card-header {
-    width: 100%;
-    height: 220px;
-    overflow: hidden;
-    position: relative;
     background-color: var(--theme-bg); 
-}
-
-/* Sallanma Animasyonu (GIF Görünümü) */
-@keyframes wave {
-    0%, 100% { transform: rotate(0deg); }
-    25% { transform: rotate(-0.5deg); }
-    75% { transform: rotate(0.5deg); }
-}
-
-.flag-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-    border-bottom: 5px solid var(--theme-dark); /* Dinamik kalın ayırıcı çizgi */
-    transition: border-color 0.4s;
-}
-
-.country-card:hover .flag-image {
-    animation: wave 1s infinite alternate; /* Hover'da bayrağı salla */
-}
-
-.header-overlay {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    padding: 10px 20px;
-    background: rgba(0, 0, 0, 0.4);
-}
-
-.header-overlay h2 {
-    color: var(--text-light);
-    font-size: 36px;
-    margin: 0;
-    border: none;
-    padding: 0;
-}
-
-.card-body {
-    padding: 30px;
-    background-color: white; 
-}
-
-/* ========================================================================= */
-/* 4. YENİ BÖLÜM YAPISI (2 SÜTUNLU DÜZEN) VE ROZETLER */
-/* ========================================================================= */
-
-.info-row { display: flex; gap: 30px; margin-top: 20px; }
-.info-column { flex: 1; min-width: 0; }
-.section-title { font-size: 18px; color: var(--theme-dark); font-weight: 600; margin-top: 20px; margin-bottom: 15px; padding-bottom: 5px; border-bottom: 2px dashed #e5e7eb; }
-
-/* Rozetler (Tags) */
-.info-badges {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin-bottom: 30px;
-    flex-wrap: wrap;
-    padding-bottom: 10px;
-    border-bottom: 1px solid #eee;
-}
-
-.badge {
-    background-color: var(--theme-bg); /* Kıta temalı rozet arkaplanı */
-    color: var(--theme-dark); /* Kıta temalı rozet metni */
+    color: var(--theme-dark); 
     padding: 8px 15px;
     border-radius: 50px;
     font-size: 14px;
@@ -540,41 +239,17 @@ h1 {
 
 .badge i { margin-right: 5px; }
 
+/* Hava durumu kutusu çıkarıldığı için sadece tablo stili korunur */
 /* ========================================================================= */
-/* 5. HAVA DURUMU STİLİ */
+/* 5. TABLO, HARİTA VE GRAFİK STİLLERİ */
 /* ========================================================================= */
 
-.weather-box {
-    background-color: var(--weather-bg);
-    border-radius: 12px;
-    padding: 15px;
-    margin-bottom: 25px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-    border: 1px solid #d1d5db;
+.country-info-table { 
+    width: 100%; 
+    border-collapse: separate; 
+    border-spacing: 0 5px; 
+    margin-top: 15px; 
 }
-
-.weather-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 10px;
-    border-bottom: 1px dashed #c0c0c0;
-    padding-bottom: 10px;
-}
-
-.weather-icon { width: 60px; height: 60px; }
-
-.weather-temp { font-size: 40px; font-weight: 700; color: var(--theme-dark); }
-
-.weather-details { font-size: 15px; margin: 5px 0; color: var(--secondary-color); }
-.weather-details strong { color: var(--text-color); }
-.error-weather { background-color: #fee2e2; color: #ef4444; padding: 10px; text-align: center; }
-
-/* ========================================================================= */
-/* 6. TABLO, HARİTA VE GRAFİK STİLLERİ */
-/* ========================================================================= */
-
-.country-info-table { width: 100%; border-collapse: separate; border-spacing: 0 5px; margin-top: 15px; }
 
 .country-info-table tr:nth-child(even) { background-color: var(--theme-bg); }
 
@@ -584,18 +259,48 @@ h1 {
 
 .country-info-table td i { margin-right: 8px; color: var(--theme-dark); }
 
-.mini-map-image { width: 100%; height: 150px; border-radius: 10px; object-fit: cover; margin-bottom: 15px; border: 3px solid var(--theme-dark); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); }
+.mini-map-image { 
+    width: 100%; 
+    height: 150px; 
+    border-radius: 10px; 
+    object-fit: cover; 
+    margin-bottom: 15px; 
+    border: 3px solid var(--theme-dark); 
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); 
+}
 
-.chart-container { padding: 15px; background-color: var(--theme-bg); border-radius: 12px; margin-top: 20px; }
+.chart-container { 
+    padding: 15px; 
+    background-color: var(--theme-bg); 
+    border-radius: 12px; 
+    margin-top: 20px; 
+}
 .chart-label { margin-top: 10px; font-weight: 600; color: var(--text-color); }
 
 /* ========================================================================= */
-/* 7. AKSİYON BUTONLARI (MARŞ/WIKIPEDIA) */
+/* 6. AKSİYON BUTONLARI (MARŞ/WIKIPEDIA) */
 /* ========================================================================= */
 
-.card-actions { display: flex; justify-content: space-around; gap: 15px; margin-top: 30px; padding-top: 15px; border-top: 1px solid #eee; }
+.card-actions { 
+    display: flex; 
+    justify-content: space-around; 
+    gap: 15px; 
+    margin-top: 30px; 
+    padding-top: 15px; 
+    border-top: 1px solid #eee; 
+}
 
-.action-btn { flex: 1; padding: 12px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s; text-decoration: none; text-align: center; }
+.action-btn { 
+    flex: 1; 
+    padding: 12px; 
+    border: none; 
+    border-radius: 8px; 
+    font-weight: 600; 
+    cursor: pointer; 
+    transition: all 0.3s; 
+    text-decoration: none; 
+    text-align: center; 
+}
 
 .anthem-btn { background-color: var(--theme-dark); color: white; }
 .anthem-btn:hover { background-color: #000; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); }
@@ -604,7 +309,7 @@ h1 {
 .info-btn:hover { background-color: #e5e7eb; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); }
 
 /* ========================================================================= */
-/* 8. RESPONSIVE (MOBİL UYUMLULUK) */
+/* 7. RESPONSIVE (MOBİL UYUMLULUK) */
 /* ========================================================================= */
 
 @media (max-width: 800px) {
@@ -613,7 +318,6 @@ h1 {
     .card-actions { flex-direction: column; gap: 10px; }
     .header-overlay h2 { font-size: 30px; }
     
-    /* Mobil Tablo Düzeni */
     .country-info-table td { display: block; width: 100%; padding: 5px 0; }
     .country-info-table td:first-child { font-weight: 700; color: var(--text-color); margin-bottom: 2px; }
 }
