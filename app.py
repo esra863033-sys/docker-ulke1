@@ -1,39 +1,25 @@
 import requests
-import logging
 from flask import Flask, jsonify, request, render_template
 from flask_cors import CORS 
-
-# =========================================================================
-# 1. TEMEL YAPILANDIRMA VE SABİTLER
-# =========================================================================
+import logging
 
 app = Flask(__name__)
-CORS(app) # Tüm endpoint'ler için CORS'u etkinleştir
+CORS(app) # Geliştirme ortamı için CORS etkinleştirildi
 
 # REST Countries API temel URL'si
 COUNTRY_API_URL = "https://restcountries.com/v3.1/name/"
 
-# Basit bir önbellekleme mekanizması (Hafızada)
 country_cache = {}
 
-
-# =========================================================================
-# 2. YARDIMCI FONKSİYON: VERİ TEMİZLEME
-# =========================================================================
-
 def clean_country_data(data):
-    """REST Countries API verisini temizler ve gelişmiş frontend için hazırlar."""
+    """Sadece istenen temel verileri temizler ve döndürür."""
     if not data or not isinstance(data, list):
         return None
 
     country = data[0]
 
-    # --- Veri Çıkarımı ---
     currencies = country.get('currencies', {})
-    currency_code = next(iter(currencies.keys()), 'N/A')
-    currency_info = currencies.get(currency_code, {})
-    currency_name = currency_info.get('name', 'N/A')
-    currency_symbol = currency_info.get('symbol', '')
+    currency_list = [f"{info.get('name', 'N/A')} ({code})" for code, info in currencies.items()]
     
     languages = country.get('languages', {})
     language_list = list(languages.values())
@@ -41,46 +27,23 @@ def clean_country_data(data):
     capital_list = country.get('capital', ['N/A'])
     capital = capital_list[0] if capital_list and capital_list[0] else 'N/A'
     
-    latlng = country.get('latlng', [0, 0])
-    
-    continent = country.get('continents', ['N/A'])[0]
-    
-    # --- Dinamik Tema Rengi ---
-    theme_color = {
-        "Africa": "yellow",
-        "Europe": "blue",
-        "Asia": "red",
-        "Americas": "green",
-        "Oceania": "turquoise"
-    }.get(continent, "gray")
+    continents = country.get('continents', ['N/A'])
+    continent = continents[0] if continents else 'N/A'
 
 
-    # --- İstenen formatta son veri yapısını oluştur ---
     cleaned_data = {
         "ülke adı": country.get('name', {}).get('common', 'N/A'),
         "başkent": capital,
-        "nüfus": country.get('population', 0), # CANVAS için sayısal tutuldu
+        "nüfus": f"{country.get('population', 0):,}".replace(",", "."), # Okunabilir formatta
         "bölge": country.get('region', 'N/A'),
         "bayrak görseli": country.get('flags', {}).get('svg', ''),
         "harita bağlantısı": country.get('maps', {}).get('googleMaps', '#'),
-        
-        # Gelişmiş Alanlar
-        "para birimi": f"{currency_name} ({currency_code})",
-        "para birimi kısa": currency_code,
-        "para birimi sembol": currency_symbol,
+        "para birimi": ', '.join(currency_list) if currency_list else 'N/A',
         "diller": ', '.join(language_list) if language_list else 'N/A',
-        "ana dil": language_list[0] if language_list else 'N/A',
-        "kıta": continent,
-        "latlng": latlng, 
-        "tema rengi": theme_color,
-        # Hava durumu alanı kaldırıldı.
+        "kıta": continent
     }
     
     return cleaned_data
-
-# =========================================================================
-# 3. ROUTE İŞLEMLERİ
-# =========================================================================
 
 @app.route('/')
 def index():
@@ -99,7 +62,7 @@ def get_country_info(country_name):
         data = response.json()
         
         if response.status_code == 404 or ('status' in data and data['status'] == 404):
-            return jsonify({"error": "Ülke Bulunamadı. Lütfen tam ve doğru bir ülke adı girin."}), 404
+            return jsonify({"error": "Ülke Bulunamadı."}), 404
 
         country_data = clean_country_data(data)
 
