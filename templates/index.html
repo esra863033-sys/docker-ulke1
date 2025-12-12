@@ -118,8 +118,6 @@
                     <div class="info-row">
                         <div class="info-column">
                             
-                            ${renderWeatherSection(data)}
-                            
                             <h4 class="section-title"><i class="fas fa-info-circle"></i> Temel Bilgiler</h4>
                             <table class="country-info-table">
                                 <tr>
@@ -136,7 +134,7 @@
                                 </tr>
                                 <tr>
                                     <td><i class="fas fa-language"></i> Konuşulan Diller</td>
-                                    <td><td>${data['diller']}</td></td>
+                                    <td>${data['diller']}</td>
                                 </tr>
                             </table>
                             
@@ -166,54 +164,26 @@
             document.getElementById('anthemButton').addEventListener('click', toggleAnthem);
         }
 
-        function renderWeatherSection(data) {
-            // ... (renderWeatherSection, renderPopulationChart, getThemeColor, toggleAnthem fonksiyonları burada yer alır)
-            // Bu fonksiyonlar önceki cevabımda verilmişti, yer kazancı için tekrar edilmemiştir.
-            
-            // [Bu alana renderWeatherSection, renderPopulationChart, getThemeColor, toggleAnthem fonksiyonlarının içeriğini yapıştırın]
-            
-            const weather = data['hava durumu'];
-            if (weather.error) {
-                return `<div class="weather-box error-weather"><i class="fas fa-exclamation-circle"></i> ${weather.error}</div>`;
-            }
-            
-            const weatherIconUrl = `https://openweathermap.org/img/wn/${weather.icon}@2x.png`;
-            return `
-                <div class="weather-box">
-                    <div class="weather-header">
-                        <img src="${weatherIconUrl}" alt="Hava Durumu İkonu" class="weather-icon">
-                        <div class="weather-temp">
-                            ${weather.temp}°C
-                        </div>
-                    </div>
-                    <p class="weather-details">
-                        <i class="fas fa-city"></i> Başkent: <strong>${data['başkent']}</strong>
-                    </p>
-                    <p class="weather-details">
-                        <i class="fas fa-cloud"></i> Durum: ${weather.description}
-                    </p>
-                    <p class="weather-details">
-                        <i class="fas fa-wind"></i> Rüzgar: ${weather.wind} m/s
-                    </p>
-                </div>
-            `;
-        }
-
+        // renderWeatherSection fonksiyonu kaldırıldı.
+        
         function renderPopulationChart(population, theme) {
+            // Dünya tahmini nüfusu (2024 itibarıyla kabaca 8.1 Milyar)
             const WORLD_POPULATION = 8100000000;
+            
             const chartData = {
                 labels: ['Ülke Nüfusu', 'Dünya Geri Kalanı'],
                 datasets: [{
                     data: [population, WORLD_POPULATION - population],
                     backgroundColor: [
-                        getThemeColor(theme, true),
-                        '#e5e7eb'
+                        getThemeColor(theme, true), 
+                        '#e5e7eb' 
                     ],
                     hoverOffset: 10
                 }]
             };
 
             const ctx = document.getElementById('populationChart').getContext('2d');
+            
             if (populationChart) {
                 populationChart.destroy();
             }
