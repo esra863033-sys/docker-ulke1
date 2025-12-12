@@ -8,11 +8,7 @@ from flask_cors import CORS
 # =========================================================================
 
 app = Flask(__name__)
-CORS(app) # Tüm endpoint'ler için CORS'u etkinleştir (Geliştirme için önemli)
-
-# ⚠️ KENDİ OPENWEATHERMAP API ANAHTARINIZI BURAYA YAZIN
-WEATHER_API_KEY = "YOUR_OPENWEATHERMAP_API_KEY" 
-WEATHER_API_URL = "https://api.openweathermap.org/data/2.5/weather"
+CORS(app) # Tüm endpoint'ler için CORS'u etkinleştir
 
 # REST Countries API temel URL'si
 COUNTRY_API_URL = "https://restcountries.com/v3.1/name/"
@@ -22,42 +18,8 @@ country_cache = {}
 
 
 # =========================================================================
-# 2. YARDIMCI FONKSİYONLAR
+# 2. YARDIMCI FONKSİYON: VERİ TEMİZLEME
 # =========================================================================
-
-def get_weather_data(capital):
-    """Başkent adına göre hava durumu verilerini OpenWeatherMap'ten çeker."""
-    if not WEATHER_API_KEY or capital == 'N/A' or not capital:
-        return {"error": "Hava durumu API anahtarı veya başkent bilgisi eksik."}
-
-    try:
-        weather_params = {
-            'q': capital,
-            'appid': WEATHER_API_KEY,
-            'units': 'metric', # Santigrat
-            'lang': 'tr' # Türkçe açıklama
-        }
-        response = requests.get(WEATHER_API_URL, params=weather_params, timeout=5)
-        response.raise_for_status()
-        
-        data = response.json()
-        
-        return {
-            "temp": round(data['main']['temp']),
-            "description": data['weather'][0]['description'].capitalize(),
-            "icon": data['weather'][0]['icon'],
-            "wind": round(data['wind']['speed'])
-        }
-
-    except requests.exceptions.HTTPError as e:
-        return {"error": f"Hava durumu bilgisi alınamadı ({e.response.status_code})."}
-    except requests.exceptions.RequestException as e:
-        logging.error(f"Hava durumu bağlantı hatası ({capital}): {e}")
-        return {"error": "Hava durumu API'sine bağlanılamadı."}
-    except Exception as e:
-        logging.error(f"Hava durumu işleme hatası: {e}")
-        return {"error": "Bilinmeyen bir hava durumu hatası."}
-
 
 def clean_country_data(data):
     """REST Countries API verisini temizler ve gelişmiş frontend için hazırlar."""
@@ -92,9 +54,6 @@ def clean_country_data(data):
         "Oceania": "turquoise"
     }.get(continent, "gray")
 
-    # --- İkincil API Çağrısı ---
-    weather = get_weather_data(capital)
-
 
     # --- İstenen formatta son veri yapısını oluştur ---
     cleaned_data = {
@@ -114,7 +73,7 @@ def clean_country_data(data):
         "kıta": continent,
         "latlng": latlng, 
         "tema rengi": theme_color,
-        "hava durumu": weather
+        # Hava durumu alanı kaldırıldı.
     }
     
     return cleaned_data
