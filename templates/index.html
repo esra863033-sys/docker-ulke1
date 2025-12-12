@@ -3,16 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ülke Bilgi Kartları</title>
+    <title>Gelişmiş Ülke Bilgi Kartları</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
     <div class="container">
-        <h1>🌎 Ülke Bilgi Kartı Uygulaması</h1>
+        <h1>✨ Gelişmiş Ülke Bilgi Kartı Uygulaması</h1>
         <div class="search-box">
-            <input type="text" id="countryInput" placeholder="Bir ülke adı girin (örn: Turkey, France, Germany)">
+            <input type="text" id="countryInput" placeholder="Bir ülke adı girin (örn: Turkey, Japan, Brazil)">
             <button id="searchButton">ARA</button>
         </div>
 
@@ -20,108 +22,256 @@
         
         <div id="countryCard" class="country-card hidden">
             </div>
+        
+        <audio id="anthemAudio" preload="auto">
+            <source src="https://upload.wikimedia.org/wikipedia/commons/e/e6/Turkey-National_Anthem-MPEG.ogg" type="audio/ogg">
+            Ses dosyası yüklenemedi.
+        </audio>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const countryInput = document.getElementById('countryInput');
-            const searchButton = document.getElementById('searchButton');
-            const countryCard = document.getElementById('countryCard');
-            const messageElement = document.getElementById('message');
+        // GLOBALS
+        let populationChart;
+        const countryInput = document.getElementById('countryInput');
+        const searchButton = document.getElementById('searchButton');
+        const countryCard = document.getElementById('countryCard');
+        const messageElement = document.getElementById('message');
+        const anthemAudio = document.getElementById('anthemAudio');
 
+
+        document.addEventListener('DOMContentLoaded', () => {
             searchButton.addEventListener('click', searchCountry);
             countryInput.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
                     searchCountry();
                 }
             });
-
-            async function searchCountry() {
-                const countryName = countryInput.value.trim();
-                
-                if (!countryName) {
-                    displayMessage('Lütfen bir ülke adı girin.', 'error');
-                    countryCard.classList.add('hidden');
-                    return;
-                }
-
-                // Arama başlatıldığında kartı gizle ve yükleme mesajı göster
-                countryCard.classList.add('hidden');
-                displayMessage('Bilgiler yükleniyor...', 'loading');
-                
-                try {
-                    const response = await fetch(`/api/country/${countryName}`);
-                    const data = await response.json();
-
-                    if (response.ok) {
-                        renderCountryCard(data);
-                        countryCard.classList.remove('hidden');
-                        displayMessage(''); // Mesajı temizle
-                    } else {
-                        // Backend'den gelen hata mesajını göster
-                        displayMessage(data.error || 'Bilinmeyen bir hata oluştu.', 'error');
-                        countryCard.classList.add('hidden');
-                    }
-
-                } catch (error) {
-                    console.error('Fetch hatası:', error);
-                    displayMessage('Ağa bağlanırken bir hata oluştu. Lütfen tekrar deneyin.', 'error');
-                    countryCard.classList.add('hidden');
-                }
-            }
-
-            function renderCountryCard(data) {
-                // Bilgiler tablosu oluşturuluyor
-                const infoTable = `
-                    <table class="country-info-table">
-                        <tr>
-                            <td><strong>Başkent</strong></td>
-                            <td>${data['başkent']}</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Nüfus</strong></td>
-                            <td>${data['nüfus']}</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Kıta</strong></td>
-                            <td>${data['kıta']}</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Bölge</strong></td>
-                            <td>${data['bölge']}</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Para Birimi</strong></td>
-                            <td>${data['para birimi']}</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Diller</strong></td>
-                            <td>${data['diller']}</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Harita</strong></td>
-                            <td><a href="${data['harita bağlantısı']}" target="_blank">Google Maps'te Gör</a></td>
-                        </tr>
-                    </table>
-                `;
-
-                // Kartın ana yapısı oluşturuluyor
-                countryCard.innerHTML = `
-                    <div class="card-header">
-                        <img src="${data['bayrak görseli']}" alt="${data['ülke adı']} Bayrağı" class="flag-image">
-                    </div>
-                    <div class="card-body">
-                        <h2>${data['ülke adı']}</h2>
-                        ${infoTable}
-                    </div>
-                `;
-            }
-
-            function displayMessage(text, type = 'info') {
-                messageElement.textContent = text;
-                messageElement.className = `message ${type}`; // Sınıfı temizleyip yenisini ekle
-            }
         });
+
+        async function searchCountry() {
+            const countryName = countryInput.value.trim();
+            if (!countryName) {
+                displayMessage('Lütfen bir ülke adı girin.', 'error');
+                countryCard.classList.add('hidden');
+                return;
+            }
+
+            // Yükleme durumu ve UI güncellemesi
+            countryCard.classList.add('hidden');
+            searchButton.disabled = true;
+            searchButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Yükleniyor...';
+            displayMessage('Bilgiler yükleniyor...', 'loading');
+            
+            // Oynayan marşı durdur
+            if (!anthemAudio.paused) {
+                anthemAudio.pause();
+                anthemAudio.currentTime = 0;
+                document.getElementById('anthemButton') && document.getElementById('anthemButton').innerHTML = '<i class="fas fa-play"></i> Marşı Dinle 🎧';
+            }
+
+            try {
+                const response = await fetch(`/api/country/${countryName}`);
+                const data = await response.json();
+
+                if (response.ok) {
+                    renderCountryCard(data);
+                    countryCard.classList.remove('hidden');
+                    displayMessage('');
+                } else {
+                    displayMessage(data.error || 'Bilinmeyen bir hata oluştu.', 'error');
+                    countryCard.classList.add('hidden');
+                }
+
+            } catch (error) {
+                console.error('Fetch hatası:', error);
+                displayMessage('Ağa bağlanırken bir hata oluştu. Lütfen tekrar deneyin.', 'error');
+                countryCard.classList.add('hidden');
+            } finally {
+                searchButton.disabled = false;
+                searchButton.innerHTML = 'ARA';
+            }
+        }
+
+        function renderCountryCard(data) {
+            // Harita URL'i: Yandex Statik Harita
+            const lat = data.latlng[0] || 0;
+            const lon = data.latlng[1] || 0;
+            const mapZoom = 5; 
+            const mapUrl = `https://static-maps.yandex.ru/1.x/?ll=${lon},${lat}&z=${mapZoom}&l=map&size=300,150&pt=${lon},${lat},pm2rdm`;
+
+            // Kartın HTML yapısı
+            countryCard.innerHTML = `
+                <div class="card-header" data-theme="${data['tema rengi']}">
+                    <img src="${data['bayrak görseli']}" alt="${data['ülke adı']} Bayrağı" class="flag-image" id="flagImage">
+                    <div class="header-overlay">
+                        <h2>${data['ülke adı']}</h2>
+                    </div>
+                </div>
+                <div class="card-body">
+                    
+                    <div class="info-badges">
+                        <span class="badge"><i class="fas fa-landmark"></i> Başkent: ${data['başkent']}</span>
+                        <span class="badge"><i class="fas fa-comments"></i> Dil: ${data['ana dil']}</span>
+                        <span class="badge"><i class="fas fa-money-bill-wave"></i> Para: ${data['para birimi kısa']} (${data['para birimi sembol']})</span>
+                    </div>
+
+                    <div class="info-row">
+                        <div class="info-column">
+                            
+                            ${renderWeatherSection(data)}
+                            
+                            <h4 class="section-title"><i class="fas fa-info-circle"></i> Temel Bilgiler</h4>
+                            <table class="country-info-table">
+                                <tr>
+                                    <td><i class="fas fa-globe"></i> Kıta</td>
+                                    <td>${data['kıta']}</td>
+                                </tr>
+                                <tr>
+                                    <td><i class="fas fa-earth-europe"></i> Bölge</td>
+                                    <td>${data['bölge']}</td>
+                                </tr>
+                                <tr>
+                                    <td><i class="fas fa-sack-dollar"></i> Para Birimi</td>
+                                    <td>${data['para birimi']}</td>
+                                </tr>
+                                <tr>
+                                    <td><i class="fas fa-language"></i> Konuşulan Diller</td>
+                                    <td><td>${data['diller']}</td></td>
+                                </tr>
+                            </table>
+                            
+                            <div class="card-actions">
+                                <button id="anthemButton" class="action-btn anthem-btn"><i class="fas fa-play"></i> Marşı Dinle 🎧</button>
+                                <a href="https://wikipedia.org/wiki/${data['ülke adı']}" target="_blank" class="action-btn info-btn"><i class="fas fa-book-open"></i> Daha Fazla Bilgi</a>
+                            </div>
+
+                        </div>
+                        <div class="info-column map-and-chart">
+                            <h4 class="section-title"><i class="fas fa-map-location-dot"></i> Harita ve Nüfus</h4>
+                            
+                            <img src="${mapUrl}" alt="Ülke Haritası" class="mini-map-image">
+                            
+                            <div class="chart-container">
+                                <canvas id="populationChart"></canvas>
+                                <p class="chart-label">Toplam Nüfus: ${data['nüfus'].toLocaleString('tr-TR')}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            `;
+            
+            // Chart.js ve Marş butonunu etkinleştir
+            renderPopulationChart(data['nüfus'], data['tema rengi']);
+            document.getElementById('anthemButton').addEventListener('click', toggleAnthem);
+        }
+
+        function renderWeatherSection(data) {
+            // ... (renderWeatherSection, renderPopulationChart, getThemeColor, toggleAnthem fonksiyonları burada yer alır)
+            // Bu fonksiyonlar önceki cevabımda verilmişti, yer kazancı için tekrar edilmemiştir.
+            
+            // [Bu alana renderWeatherSection, renderPopulationChart, getThemeColor, toggleAnthem fonksiyonlarının içeriğini yapıştırın]
+            
+            const weather = data['hava durumu'];
+            if (weather.error) {
+                return `<div class="weather-box error-weather"><i class="fas fa-exclamation-circle"></i> ${weather.error}</div>`;
+            }
+            
+            const weatherIconUrl = `https://openweathermap.org/img/wn/${weather.icon}@2x.png`;
+            return `
+                <div class="weather-box">
+                    <div class="weather-header">
+                        <img src="${weatherIconUrl}" alt="Hava Durumu İkonu" class="weather-icon">
+                        <div class="weather-temp">
+                            ${weather.temp}°C
+                        </div>
+                    </div>
+                    <p class="weather-details">
+                        <i class="fas fa-city"></i> Başkent: <strong>${data['başkent']}</strong>
+                    </p>
+                    <p class="weather-details">
+                        <i class="fas fa-cloud"></i> Durum: ${weather.description}
+                    </p>
+                    <p class="weather-details">
+                        <i class="fas fa-wind"></i> Rüzgar: ${weather.wind} m/s
+                    </p>
+                </div>
+            `;
+        }
+
+        function renderPopulationChart(population, theme) {
+            const WORLD_POPULATION = 8100000000;
+            const chartData = {
+                labels: ['Ülke Nüfusu', 'Dünya Geri Kalanı'],
+                datasets: [{
+                    data: [population, WORLD_POPULATION - population],
+                    backgroundColor: [
+                        getThemeColor(theme, true),
+                        '#e5e7eb'
+                    ],
+                    hoverOffset: 10
+                }]
+            };
+
+            const ctx = document.getElementById('populationChart').getContext('2d');
+            if (populationChart) {
+                populationChart.destroy();
+            }
+
+            populationChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: chartData,
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { color: '#333' } },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.parsed;
+                                    const label = context.label;
+                                    return `${label}: ${value.toLocaleString('tr-TR')} kişi`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function getThemeColor(theme, isDark = false) {
+            const palette = {
+                'yellow': isDark ? '#facc15' : '#fef08a', 
+                'blue': isDark ? '#3b82f6' : '#bfdbfe',  
+                'red': isDark ? '#ef4444' : '#fecaca',   
+                'green': isDark ? '#10b981' : '#a7f3d0', 
+                'turquoise': isDark ? '#06b6d4' : '#a5f3fc', 
+                'gray': isDark ? '#6b7280' : '#d1d5db'
+            };
+            return palette[theme] || palette['gray'];
+        }
+
+        function toggleAnthem() {
+            const button = document.getElementById('anthemButton');
+            
+            if (anthemAudio.paused) {
+                anthemAudio.play();
+                button.innerHTML = '<i class="fas fa-pause"></i> Marşı Durdur ⏸️';
+            } else {
+                anthemAudio.pause();
+                button.innerHTML = '<i class="fas fa-play"></i> Marşı Dinle 🎧';
+            }
+            
+            anthemAudio.onended = () => {
+                button.innerHTML = '<i class="fas fa-play"></i> Marşı Dinle 🎧';
+                anthemAudio.currentTime = 0;
+            };
+        }
+
+        function displayMessage(text, type = 'info') {
+            messageElement.textContent = text;
+            messageElement.className = `message ${type}`; 
+        }
     </script>
 </body>
 </html>
